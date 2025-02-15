@@ -7,7 +7,7 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CrawlerSingleThreaded {
+public class CrawlerSingleThreaded implements Crawler {
 
     private final String startingUrl;
     private final String regex;
@@ -24,6 +24,7 @@ public class CrawlerSingleThreaded {
         regexPattern = Pattern.compile(regex);
     }
 
+    @Override
     public void crawl() {
         WebPageFetcher webPageFetcher = new WebPageFetcher();
 

@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CrawlerMultiThreaded {
+public class CrawlerMultiThreaded implements Crawler{
 
     private static final int THREAD_COUNT = 5;
 
@@ -28,7 +28,8 @@ public class CrawlerMultiThreaded {
         urlStack.push(startUrl);
     }
 
-    public void start() {
+    @Override
+    public void crawl() {
         while (pagesCrawled.get() < maxPages) {
             try {
                 String url = urlStack.poll(10, TimeUnit.SECONDS);
@@ -36,7 +37,7 @@ public class CrawlerMultiThreaded {
                     break;
                 }
                 if (visitedUrls.add(url)) {
-                    executor.submit(() -> crawl(url));
+                    executor.submit(() -> crawlInternal(url));
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
@@ -45,7 +46,7 @@ public class CrawlerMultiThreaded {
         shutdown();
     }
 
-    private void crawl(String url) {
+    private void crawlInternal(String url) {
         pagesCrawled.incrementAndGet();
 
         if (pagesCrawled.get() > maxPages) {

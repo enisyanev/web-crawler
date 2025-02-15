@@ -10,9 +10,10 @@ public class Main {
 
     public static void main(String[] args) {
 
-        String url = "http://petpas.100webspace.net/georgi/";
+        String url = "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions";
         String wordRegex = "(?i)\\b(regular\\w*)";
         int maxPages = 15;
+        boolean multithreaded = false;
 
         CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
                 MongoClientSettings.getDefaultCodecRegistry(),
@@ -22,17 +23,19 @@ public class Main {
         try (MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017")) {
             MongoDatabase db = mongoClient.getDatabase("crawling").withCodecRegistry(pojoCodecRegistry);
             CrawlingDataDao dao = new CrawlingDataDao(db);
+            Crawler crawler = getImplementation(multithreaded, url, wordRegex, maxPages, dao);
 
-//            CrawlerSingleThreaded singleThreaded = new CrawlerSingleThreaded(url, wordRegex, maxPages, dao);
-//            singleThreaded.crawl();
-
-            CrawlerMultiThreaded multiThreaded = new CrawlerMultiThreaded(url, wordRegex, maxPages, dao);
-            multiThreaded.start();
+            crawler.crawl();
         }
 
+    }
 
+    private static Crawler getImplementation(boolean multithreaded, String url, String wordRegex, int maxPages,
+                                             CrawlingDataDao dao) {
+        if (multithreaded) {
+            return new CrawlerMultiThreaded(url, wordRegex, maxPages, dao);
+        }
 
-
-
+        return new CrawlerSingleThreaded(url, wordRegex, maxPages, dao);
     }
 }
